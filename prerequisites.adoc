@@ -1,0 +1,20 @@
+= Pivotal Cloud Foundry Workshop @ AudaExplore
+
+== Prerequisites 
+
+*** Refer to your worksheet for your credentials
+*** Download and Install the CF CLI
+**** In a browser, go to https://apps.pcf1.cloud.fe.pivotal.io, log in and download the CF CLI for your Operating System. If you don't see this option when you log in, navigate to Tools menu.
+*** Download and Install MySQL http://dev.mysql.com/downloads/mysql/ using the MySQL Installer for Windows
+*** Once MySQL is installed, create a database and user with the following script:
+```
+CREATE DATABASE pcfdemo;
+CREATE USER 'pcfuser'@'%' IDENTIFIED BY 'pcfpwd';
+GRANT ALL ON pcfdemo.* TO 'pcfuser'@'%';
+```
+We'll use this later when we walk through the .NET application
+
+*** (Optional) Install GIT from https://git-scm.com/downloads
+*** (Optional) Configure Command Prompt Properties to make it easier for cutting & pasting in a Command Prompt
+**** Turn on QuickEdit Mode (under the optons tab)
+**** Change buffer and screen size to provide a biger area
