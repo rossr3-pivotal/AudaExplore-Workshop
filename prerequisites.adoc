@@ -18,3 +18,5 @@ We'll use this later when we walk through the .NET application
 *** (Optional) Configure Command Prompt Properties to make it easier for cutting & pasting in a Command Prompt
 **** Turn on QuickEdit Mode (under the optons tab)
 **** Change buffer and screen size to provide a biger area
+
+** Navigate back to the link:README.adoc[Workshop Agenda]
