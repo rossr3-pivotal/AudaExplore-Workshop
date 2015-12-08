@@ -1,34 +1,19 @@
-= Pivotal Cloud Foundry Workshop @ Humana
+= Pivotal Cloud Foundry Workshop @ AudaExplore
 
 == Schedule
 
 This workshop will provide developers and operators an indepth overview of Pivotal Cloud Foundry concepts, architecture and fundamentals of pushing code and building applications. The session includes presentations, demos and hands on labs
 
-8:00 AM - 9:00 AM::   Registration & Breakfast
-9:00 AM - 10:00 AM::  Keynote: Cloud Native for Enterprise | Rapidly deliver continuous value to Humana's consumers
-10:00 AM - 11:00 AM:: Cloud Native Defined (Mark Ruesink, Pivotal CTO)
-11:00 AM - 11:15 AM:: Break
+8:00 AM - 9:00 AM::   Registration & Setup
+9:00 AM - 10:30 AM::  Pushing, Binding Services & Scaling Apps with Pivotal Cloud Foundry
+10:30 AM - 10:45 AM:: Break
+10:45 AM - 12:00 PM:: Pivotal Cloud Foundry Architecture and Deep Dive
 11:15 AM - 12:15 PM:: Pushing Code with Pivotal Cloud Foundry
-
-12:15 PM - 12:45 PM:: Lunch Break and Split into Separate Tracks (Developer & Operator)
-
-== Track 1:  Developer: Pivotal Cloud Foundry Workshop:
-
-12:45 PM - 4:30 PM::   Developer Focused Workshop Labs:
+12:00 PM - 12:30 PM:: Lunch Break and Q&A
+12:30 PM - 4:30 PM::   Developer Focused Workshop Labs:
   * Bring your own app and push to Cloud Foundry
 
-  * Q&A and Next Steps (4:30 PM - 5:00 PM)
-
-== Track 2:  Operators: Pivotal Cloud Foundry Workshop
-
-12:45 PM - 3:30 PM::  Operator Focused Workshop
-  
-  * Transforming to Cloud Native: Why?, What?, How?
-  * Pivotal Cloud Foundry Overview
-  * Operations Key Role with Pivotal Cloud Foundry
-  * Pivotal Cloud Foundry for Operators Demonstration: (Ops Manager/Apps Manager)
-
-  * Q&A and Next Steps (3:30 PM - 4:00 PM)  
+4:30 PM - 5:00 PM:: Q&A and Next Steps (4:30 PM - 5:00 PM)
 
 == Workshop Material
 ** Lab 1 - From Zero to Pushing Your First Application
@@ -47,5 +32,4 @@ This workshop will provide developers and operators an indepth overview of Pivot
 ** link:labs/lab3/lab.adoc[Lab 3 - Operating Your Application]
 ** link:labs/lab4/lab.adoc[Lab 4 - Monitoring Your Application]
 
-==  Additional Operator Track Course Materials
-* Session Presentation: link:presentations/PCF_Overview_and_Ops_Workshop_Humana110415.pptx[Pivotal Cloud Foundry Operator Focused Session/Presentation]
+
