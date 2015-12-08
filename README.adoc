@@ -5,7 +5,7 @@
 This workshop will provide developers and operators an indepth overview of Pivotal Cloud Foundry concepts, architecture and fundamentals of pushing code and building applications. The session includes presentations, demos and hands on labs
 
 8:00 AM - 9:00 AM::   Registration & Setup
-*** link:prerequisites.adoc[** Prerequisites **]
+*** link:prerequisites.adoc[** Setup Instructions **]
 9:00 AM - 10:30 AM::  Pushing, Binding Services & Scaling Apps with Pivotal Cloud Foundry
 10:30 AM - 10:45 AM:: Break
 10:45 AM - 12:00 PM:: Pivotal Cloud Foundry Architecture and Deep Dive
