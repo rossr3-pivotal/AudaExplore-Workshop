@@ -18,7 +18,8 @@ This workshop will provide developers and operators an indepth overview of Pivot
 
 == Workshop Material
 ** Lab 1 - From Zero to Pushing Your First Application
-*** link:labs/lab5/lab.adoc[**.NET** Application]
+*** link:labs/lab5/lab.adoc[**.NET** PCF Environment Application]
+*** link:labs/lab6/lab.adoc[**.NET** ASP.NET MVC Application]
 *** link:labs/lab1/lab.adoc[**Java** Application]
 *** link:labs/lab1/lab-ruby.adoc[**Ruby** Application]
 *** link:labs/lab1/lab-node.adoc[**NodeJS** Application]

@@ -1,0 +1,195 @@
+= Lab 6 - Deploying an ASP.NET MVC Application
+
+[abstract]
+--
+In this lab we will push an ASP.NET MVC web application to cloud foundry.
+--
+
+= Lab - From Zero to Pushing Your First Application
+
+== Target
+
+. If you haven't already, download the latest release of the Cloud Foundry command line interface  (CLI) from https://github.com/cloudfoundry/cli/releases for your operating system and install it.
+
+. Set the API target for the CLI: (set appropriate end point for your environment)
++
+----
+$ cf api https://api.pcf1.cloud.fe.pivotal.io --skip-ssl-validation
+----
+
+. Login to Pivotal Cloudfoundry:
++
+----
+$ cf login
+----
++
+Follow the prompts.  You should have a welcome card with your username and password on it.  If you didn't get one, please ask.
+
+== Create a New ASP.NET Web Application 
+
+. Open Visual Studio and create a new ASP.NET Web Application with the name MVCAttendees
+.. Choose MVC as the Template
+.. Change the Authentication to No Authentication
+. Run it locally to verify that the application works locally
+
+== Publish the Application
+
+. Right click on the project name and select Publish...
+. Choose a Custom publish target. 
+.. Provide a name like Publish for PCF - Debug
+.. Publish method: File System
+.. Target location ..\PCFDeploy
+.. Choose a configuration (Debug or Release)
+.. (Optional) Change File Publish Options
+... Check Delete all existing files prior to publish
+... Check Precompile during publishing
+. Create a PCF Manifest file
+.. Create a manfest.yml file in the Publish Target Location
+.. Change the section <your initials> to use your own initials
+```
+---
+applications:
+- name: wsattendees
+  host: wsattendees-<your initials>
+  memory: 512m
+  stack: windows2012R2
+  buildpack: binary_buildpack
+```
+. Open up a command prompt 
+
+== Push It!
+
+. Change to the _Publish Target Location_  directory (this is the folder containing the published code files and manifest.yml):
++
+----
+$ cd $ProjectHome/PCFDeploy
+----
+
+. Push the application!
++
+----
+$ cf push
+----
++
+You should see output similar to the following listing. Take a look at the listing callouts for a play-by-play of what's happening:
++
+====
+----
+C:\...\MVCAttendees\PCFDeploy>cf push
+Using manifest file C:\Users\Rick Ross\Documents\Visual Studio 2015\Projects\MVCAttendees\PCFDeploy\manifest.yml
+
+Using stack windows2012R2...
+OK
+Creating app wsattendees in org instructor / space development as instructor...
+OK
+
+Creating route wsattendees-rr.pcf1.cloud.fe.pivotal.io...
+OK
+
+Binding wsattendees-rr.pcf1.cloud.fe.pivotal.io to wsattendees...
+OK
+
+Uploading wsattendees...
+Uploading app files from: C:\Users\Rick Ross\Documents\Visual Studio 2015\Projects\MVCAttendees\PCFDeploy
+Uploading 1.1M, 47 files
+Done uploading
+OK
+
+Starting app wsattendees in org instructor / space development as instructor...
+Creating container
+Successfully created container
+Downloading app package...
+Downloaded app package (5.8M)
+Downloading buildpacks (binary_buildpack)...
+Downloading binary_buildpack...
+Downloaded binary_buildpack
+Downloaded buildpacks
+Staging...
+Exit status 0
+Staging complete
+Uploading droplet, build artifacts cache...
+Uploading build artifacts cache...
+Uploading droplet...
+Uploaded droplet (5.8M)
+Uploading complete
+
+0 of 1 instances running, 1 starting
+0 of 1 instances running, 1 starting
+1 of 1 instances running
+
+App started
+
+
+OK
+
+App wsattendees was started using this command `..\tmp\lifecycle\WebAppServer.exe`
+
+Showing health and status for app wsattendees in org instructor / space development as instructor...
+OK
+
+requested state: started
+instances: 1/1
+usage: 512M x 1 instances
+urls: wsattendees-rr.pcf1.cloud.fe.pivotal.io
+last uploaded: Tue Dec 8 19:02:37 UTC 2015
+stack: windows2012R2
+buildpack: binary_buildpack
+
+     state     since                    cpu    memory      disk      details
+#0   running   2015-12-08 02:03:31 PM   0.0%   0 of 512M   0 of 1G
+
+$
+----
+<1> The CLI is using a manifest to provide necessary configuration details such as application name, memory to be allocated, the stack to be used (in this case Windows2012R2), the number of instances requested to start, and path to the application artifact.
+Take a look at `manifest.yml` to see how.
+<2> In most cases, the CLI indicates each Cloud Foundry API call as it happens.
+In this case, the CLI has created an application record for _wsattendees_ in your assigned space.
+<3> All HTTP/HTTPS requests to applications will flow through Cloud Foundry's front-end router called http://docs.cloudfoundry.org/concepts/architecture/router.html[(Go)Router].
+Here the CLI is creating a route with your initials (again, see `manifest.yml` for a hint!) to prevent route collisions across the default `pcf1.cloud.fe.pivotal.io` domain.
+<4> Now the CLI is _binding_ the created route to the application.
+Routes can actually be bound to multiple applications to support techniques such as http://www.mattstine.com/2013/07/10/blue-green-deployments-on-cloudfoundry[blue-green deployments].
+<5> The CLI finally uploads the application bits to Pivotal Cloud Foundry. Notice that it's uploading _47 files_! This is because Cloud Foundry actually uploads all the files for the deployment for caching purposes.
+<6> Now we begin the staging process. By choosing the Windows2012R2 stack a container is created on the runtime to prepare the application to run, a second container is then generated that will host your application...in this case using the WebAppServer process in Windows.  If you would continue on to the other language labs you can push an application on the Linux stack, this step gets replaced with the steps appropriate for the application being run.
+<7> The complete package of your application and all of its necessary runtime components is called a _droplet_.
+Here the droplet is being uploaded to Pivotal Cloudfoundry's internal blobstore so that it can be easily copied to one or more _http://docs.cloudfoundry.org/concepts/architecture/execution-agent.html[Cells]_ for execution.
+<8> The CLI tells you exactly what command and argument set was used to start your application.
+<9> Finally the CLI reports the current status of your application's health.
+====
+
+. Visit the application in your browser by hitting the route that was generated by the CLI:
++
+image::mvcattendeesrunning.png[]
+
+== Interact with App from CF CLI
+
+. Get information about the currently deployed application using CLI apps command:
++
+----
+$ cf apps
+----
++
+Note the application name for next steps
+
+. Scale the app to 2 instances
++
+----
+$ cf scale wsattendees -i 2
+----
+
+. Get information about running instances, memory, CPU, and other statistics using CLI instances command
++
+----
+$ cf app wsattendees
+----
+
+. Stop the deployed application using the CLI
++
+----
+$ cf stop wsattendees
+----
+
+. Delete the deployed application using the CLI
++
+----
+$ cf delete wsattendees
+----
