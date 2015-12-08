@@ -14,13 +14,13 @@ In this lab we will push an ASP.NET MVC web application to cloud foundry.
 . Set the API target for the CLI: (set appropriate end point for your environment)
 +
 ----
-$ cf api https://api.pcf1.cloud.fe.pivotal.io --skip-ssl-validation
+> cf api https://api.pcf1.cloud.fe.pivotal.io --skip-ssl-validation
 ----
 
 . Login to Pivotal Cloudfoundry:
 +
 ----
-$ cf login
+> cf login
 ----
 +
 Follow the prompts.  You should have a welcome card with your username and password on it.  If you didn't get one, please ask.
@@ -55,20 +55,20 @@ applications:
   stack: windows2012R2
   buildpack: binary_buildpack
 ```
-. Open up a command prompt 
 
 == Push It!
 
+. Open up a command prompt 
 . Change to the _Publish Target Location_  directory (this is the folder containing the published code files and manifest.yml):
 +
 ----
-$ cd $ProjectHome/PCFDeploy
+> cd $ProjectHome/PCFDeploy
 ----
 
 . Push the application!
 +
 ----
-$ cf push
+> cf push
 ----
 +
 You should see output similar to the following listing. Take a look at the listing callouts for a play-by-play of what's happening:
@@ -165,7 +165,7 @@ image::mvcattendeesrunning.png[]
 . Get information about the currently deployed application using CLI apps command:
 +
 ----
-$ cf apps
+> cf apps
 ----
 +
 Note the application name for next steps
@@ -173,23 +173,23 @@ Note the application name for next steps
 . Scale the app to 2 instances
 +
 ----
-$ cf scale wsattendees -i 2
+> cf scale wsattendees -i 2
 ----
 
 . Get information about running instances, memory, CPU, and other statistics using CLI instances command
 +
 ----
-$ cf app wsattendees
+> cf app wsattendees
 ----
 
 . Stop the deployed application using the CLI
 +
 ----
-$ cf stop wsattendees
+> cf stop wsattendees
 ----
 
 . Delete the deployed application using the CLI
 +
 ----
-$ cf delete wsattendees
+> cf delete wsattendees
 ----
