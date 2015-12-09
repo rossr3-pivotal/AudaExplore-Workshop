@@ -265,10 +265,153 @@ image::appwithattendeeslist.png[]
 
 === Running on Pivotal Cloud Foundry
 
+Before we can push the application to Pivotal Cloud Foundry, we need to provision a MySQL 
+service and inject the credentials into our Web.Config. If we were to push the application 
+at this point, we would see an exception because it would not be able to connect to the database.
 
-== Target
+==== Binding to Services
 
-. If you haven't already, download the latest release of the Cloud Foundry command line interface  (CLI) from https://github.com/cloudfoundry/cli/releases for your operating system and install it.
+First, let's provision a new MySQL server instance with the default plan. To see what s
+ervices are available, run the following command:
++
+----
+> cf marketplace
+Getting services from marketplace in org instructor / space development as instructor...
+OK
+
+service                       plans                                                                                description
+3scale                        free_appdirect, basic_appdirect*, pro_appdirect*                                     API Management Platform
+app-autoscaler                bronze, gold                                                                         Scales bound applications in response to load
+blazemeter                    free-tier, basic1kmr*, pro5kmr*                                                      Performance Testing Platform
+cedexisradar                  free-community-edition, radar-community-private-benchmarking*                        Free Website&amp; Mobile App Performance Reports
+cleardb                       spark, boost*, amp*, shock*                                                          Highly available MySQL for your Apps.
+cloudamqp                     lemur, tiger*, bunny*, rabbit*, panda*                                               Managed HA RabbitMQ servers in the cloud
+cloudforge                    free, standard*, pro*                                                                Development Tools In The Cloud
+elephantsql                   turtle, panda*, hippo*, elephant*                                                    PostgreSQL as a Service
+flashreport                   trial, basic*, silver*, gold*, platinum*                                             Generate PDF from your data
+loadimpact                    lifree, li100*, li500*, li1000*                                                      Automated and on-demand performance testing
+memcachedcloud                100mb*, 250mb*, 500mb*, 1gb*, 2-5gb*, 5gb*, 10gb*, 30mb                              Enterprise-Class Memcached for Developers
+memcachier                    100*, 250*, 500*, 1000*, 2000*, 5000*, 7500*, 10000*, 20000*, 50000*, 100000*, dev   The easiest, most advanced memcache.
+mongolab                      sandbox                                                                              Fully-managed MongoDB-as-a-Service
+mssql-dev                     default                                                                              Microsoft SQL Server service for application development and testing
+newrelic                      standard, pro*                                                                       Manage and monitor your apps
+p-circuit-breaker-dashboard   standard                                                                             Circuit Breaker Dashboard for Spring Cloud Applications
+p-config-server               standard                                                                             Config Server for Spring Cloud Applications
+p-mongodb                     development                                                                          MongoDB service for application development and testing
+p-mysql                       100mb-dev                                                                            MySQL service for application development and testing
+p-neo4j                       development                                                                          Neo4j service for application development and testing
+p-rabbitmq                    standard                                                                             RabbitMQ is a robust and scalable high-performance multi-protocol messaging broker.
+p-redis                       shared-vm, dedicated-vm                                                              Redis service to provide a key-value store
+p-service-registry            standard                                                                             Service Registry for Spring Cloud Applications
+pubnub                        free                                                                                 Build Realtime Apps that Scale
+rediscloud                    100mb*, 250mb*, 500mb*, 1gb*, 2-5gb*, 5gb*, 10gb*, 50gb*, 30mb                       Enterprise-Class Redis for Developers
+searchly                      small*, micro*, professional*, advanced*, starter, business*, enterprise*            Search Made Simple. Powered-by Elasticsearch
+sendgrid                      free, bronze*, silver*, gold*, platinum*                                             Email Delivery. Simplified.
+stamplay                      plus*, premium*, core, starter*                                                      API-first development platform
+statica                       starter, spike*, micro*, medium*, large*, enterprise*, premium*                      Enterprise Static IP Addresses
+
+* These service plans have an associated cost. Creating a service instance will incur this cost.
+
+TIP:  Use 'cf marketplace -s SERVICE' to view descriptions of individual plans of a given service.
+----
+
+We want to create a service. 
+
+. Run the following command
++
+----
+> cf create-service p-mysql 100mb attendeeDb
+----
+. Now bind the service to our application. 
++
+----
+> cf bind-service wsattendees attendeeDb
+----
+
+The way Pivotal Cloud Foundry binds to .NET applications via the web config is through a 
+https://docs.pivotal.io/pivotalcf/devguide/services/user-provided.html[User Provided Service] 
+and not through the normal service binding mechanism. In order to get the credentials from 
+the service we just bound to, we need to look at the environment variables associated with 
+our application
+
+----
+> cf env wsattendees
+Getting env variables for app wsattendees in org instructor / space development as instructor...
+OK
+
+System-Provided:
+{
+ "VCAP_SERVICES": {
+  "p-mysql": [
+   {
+    "credentials": {
+     "hostname": "10.68.144.104",
+     "jdbcUrl": "jdbc:mysql://10.68.144.104:3306/cf_6ef3be55_6bd6_49cf_89b7_6b91af126684?user=TePqTk1oV9NmaFW6\u0026password=UTFPBbyD6hJnOAFO",
+     "name": "cf_6ef3be55_6bd6_49cf_89b7_6b91af126684",
+     "password": "UTFPBbyD6hJnOAFO",
+     "port": 3306,
+     "uri": "mysql://TePqTk1oV9NmaFW6:UTFPBbyD6hJnOAFO@10.68.144.104:3306/cf_6ef3be55_6bd6_49cf_89b7_6b91af126684?reconnect=true",
+     "username": "TePqTk1oV9NmaFW6"
+    },
+    "label": "p-mysql",
+    "name": "attendeeDb",
+    "plan": "100mb-dev",
+    "tags": [
+     "mysql",
+     "relational"
+    ]
+   }
+  ]
+ }
+}
+
+
+... // additional service information removed for brevity 
+----
+
+Now we need to create the user-provided service and bind that to the application. The user 
+provided service needs three parameters: name, connectionString and providerName. These 
+correspond to the connection paratmers within the web.config. 
+. The first step is to create the user provided service with the name attendeeUPS
++
+----
+> cf create-user-provided-service attendeeUPS -p "name, connectionString, providerName"
+----
+.. For the Name use AttendeeContext -- Note: This MUST match the existing name in your 
+<connectionStrings> section in the web.config file
+.. For the connectionString use the same format that is in the web.config, and substitute 
+your service credentials above. In this case it would look like this
+... Server=10.68.144.104;Port=3306;Database=cf_6ef3be55_6bd6_49cf_89b7_6b91af126684;Uid=TePqTk1oV9NmaFW6;Pwd=UTFPBbyD6hJnOAFO
+... Where the Server maps to the hostname, Database maps to the name, Uid maps to username and Pwd maps to password
+.. For the ProviderName use MySql.Data.MySqlClient - the same value that is in your web.config. The output should look like this:
++
+----
+> cf create-user-provided-service attendeeUPS -p "name, connectionString, providerName"
+
+name> AttendeeContext
+
+connectionString> Server=10.68.144.104;Port=3306;Database=cf_6ef3be55_6bd6_49cf_89b7_6b91af126684;Uid=TePqTk1oV9NmaFW6;Pwd=UTFPBbyD6hJnOAFO
+
+providerName> MySql.Data.MySqlClient
+Creating user provided service attendeeUPS in org instructor / space development as instructor...
+OK
+----
+. Now we need to bind the application to our newly created user provided service
++
+----
+> cf bind-service wsattendees attendeeUPS
+Binding service attendeeUPS to app wsattendees in org instructor / space development as instructor...
+OK
+TIP: Use 'cf restage wsattendees' to ensure your env variable changes take effect
+----
+. Now we are ready to push our application again.
+
+==== Publishing and Pushing the .NET Application
+
+. Publish the .NET applicaiton by right-clicking on the project name and selecting publish. Use the same profile as was used before.
+.. Note: If you have changed namespaces or made changes to the assembly name, be sure you delete any files prior to publishing. If you do, be sure to back up the manifest.yml file.
+
+. If you need to log back in, use the next two commands from a command prompt.
 
 . Set the API target for the CLI: (set appropriate end point for your environment)
 +
@@ -284,40 +427,6 @@ image::appwithattendeeslist.png[]
 +
 Follow the prompts.  You should have a welcome card with your username and password on it.  If you didn't get one, please ask.
 
-== Create a New ASP.NET Web Application 
-
-. Open Visual Studio and create a new ASP.NET Web Application with the name MVCAttendees
-.. Choose MVC as the Template
-.. Change the Authentication to No Authentication
-. Run it locally to verify that the application works locally
-
-== Publish the Application
-
-. Right click on the project name and select Publish...
-. Choose a Custom publish target. 
-.. Provide a name like Publish for PCF - Debug
-.. Publish method: File System
-.. Target location ..\PCFDeploy
-.. Choose a configuration (Debug or Release)
-.. (Optional) Change File Publish Options
-... Check Delete all existing files prior to publish
-... Check Precompile during publishing
-. Create a PCF Manifest file
-.. Create a manfest.yml file in the Publish Target Location
-.. Change the section <your initials> to use your own initials
-```
----
-applications:
-- name: wsattendees
-  host: wsattendees-<your initials>
-  memory: 512m
-  stack: windows2012R2
-  buildpack: binary_buildpack
-```
-
-== Push It!
-
-. Open up a command prompt 
 . Change to the _Publish Target Location_  directory (this is the folder containing the published code files and manifest.yml):
 +
 ----
@@ -334,31 +443,29 @@ You should see output similar to the following listing. Take a look at the listi
 +
 ====
 ----
-C:\...\MVCAttendees\PCFDeploy>cf push
+C:\Users\Rick Ross\Documents\Visual Studio 2015\Projects\MVCAttendees\PCFDeploy>cf push
 Using manifest file C:\Users\Rick Ross\Documents\Visual Studio 2015\Projects\MVCAttendees\PCFDeploy\manifest.yml
 
 Using stack windows2012R2...
 OK
-Creating app wsattendees in org instructor / space development as instructor...
+Updating app wsattendees in org instructor / space development as instructor...
 OK
 
-Creating route wsattendees-rr.pcf1.cloud.fe.pivotal.io...
-OK
-
-Binding wsattendees-rr.pcf1.cloud.fe.pivotal.io to wsattendees...
-OK
-
+Using route wsattendees-rr.pcf1.cloud.fe.pivotal.io
 Uploading wsattendees...
 Uploading app files from: C:\Users\Rick Ross\Documents\Visual Studio 2015\Projects\MVCAttendees\PCFDeploy
-Uploading 1.1M, 47 files
+Uploading 763.9K, 48 files
 Done uploading
+OK
+
+Stopping app wsattendees in org instructor / space development as instructor...
 OK
 
 Starting app wsattendees in org instructor / space development as instructor...
 Creating container
 Successfully created container
 Downloading app package...
-Downloaded app package (5.8M)
+Downloaded app package (7.8M)
 Downloading buildpacks (binary_buildpack)...
 Downloading binary_buildpack...
 Downloaded binary_buildpack
@@ -367,9 +474,9 @@ Staging...
 Exit status 0
 Staging complete
 Uploading droplet, build artifacts cache...
-Uploading build artifacts cache...
 Uploading droplet...
-Uploaded droplet (5.8M)
+Uploading build artifacts cache...
+Uploaded droplet (7.7M)
 Uploading complete
 
 0 of 1 instances running, 1 starting
@@ -390,65 +497,18 @@ requested state: started
 instances: 1/1
 usage: 512M x 1 instances
 urls: wsattendees-rr.pcf1.cloud.fe.pivotal.io
-last uploaded: Tue Dec 8 19:02:37 UTC 2015
+last uploaded: Wed Dec 9 15:41:25 UTC 2015
 stack: windows2012R2
 buildpack: binary_buildpack
 
      state     since                    cpu    memory      disk      details
-#0   running   2015-12-08 02:03:31 PM   0.0%   0 of 512M   0 of 1G
+#0   running   2015-12-09 10:42:20 AM   0.0%   0 of 512M   0 of 1G
 
-$
-----
-<1> The CLI is using a manifest to provide necessary configuration details such as application name, memory to be allocated, the stack to be used (in this case Windows2012R2), the number of instances requested to start, and path to the application artifact.
-Take a look at `manifest.yml` to see how.
-<2> In most cases, the CLI indicates each Cloud Foundry API call as it happens.
-In this case, the CLI has created an application record for _wsattendees_ in your assigned space.
-<3> All HTTP/HTTPS requests to applications will flow through Cloud Foundry's front-end router called http://docs.cloudfoundry.org/concepts/architecture/router.html[(Go)Router].
-Here the CLI is creating a route with your initials (again, see `manifest.yml` for a hint!) to prevent route collisions across the default `pcf1.cloud.fe.pivotal.io` domain.
-<4> Now the CLI is _binding_ the created route to the application.
-Routes can actually be bound to multiple applications to support techniques such as http://www.mattstine.com/2013/07/10/blue-green-deployments-on-cloudfoundry[blue-green deployments].
-<5> The CLI finally uploads the application bits to Pivotal Cloud Foundry. Notice that it's uploading _47 files_! This is because Cloud Foundry actually uploads all the files for the deployment for caching purposes.
-<6> Now we begin the staging process. By choosing the Windows2012R2 stack a container is created on the runtime to prepare the application to run, a second container is then generated that will host your application...in this case using the WebAppServer process in Windows.  If you would continue on to the other language labs you can push an application on the Linux stack, this step gets replaced with the steps appropriate for the application being run.
-<7> The complete package of your application and all of its necessary runtime components is called a _droplet_.
-Here the droplet is being uploaded to Pivotal Cloudfoundry's internal blobstore so that it can be easily copied to one or more _http://docs.cloudfoundry.org/concepts/architecture/execution-agent.html[Cells]_ for execution.
-<8> The CLI tells you exactly what command and argument set was used to start your application.
-<9> Finally the CLI reports the current status of your application's health.
 ====
 
 . Visit the application in your browser by hitting the route that was generated by the CLI:
 +
-image::mvcattendeesrunning.png[]
+image::apprunningonpcf.png[]
 
-== Interact with App from CF CLI
-
-. Get information about the currently deployed application using CLI apps command:
-+
-----
-> cf apps
-----
-+
-Note the application name for next steps
-
-. Scale the app to 2 instances
-+
-----
-> cf scale wsattendees -i 2
-----
-
-. Get information about running instances, memory, CPU, and other statistics using CLI instances command
-+
-----
-> cf app wsattendees
-----
-
-. Stop the deployed application using the CLI
-+
-----
-> cf stop wsattendees
-----
-
-. Delete the deployed application using the CLI
-+
-----
-> cf delete wsattendees
-----
+Note that the links to Create, Edit, Details and Delete have not been implemented and clicking on 
+them will result in an error. To see the full implementation, click on this link: http://bit.ly/pcfdotnetapp[]
