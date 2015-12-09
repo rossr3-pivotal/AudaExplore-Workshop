@@ -193,3 +193,5 @@ Note the application name for next steps
 ----
 > cf delete wsattendees
 ----
+
+*** link:labs/lab7/lab.adoc[Binding your **.NET** ASP.NET MVC Application]
