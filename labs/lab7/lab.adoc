@@ -373,7 +373,7 @@ Now we need to create the user-provided service and bind that to the application
 provided service needs three parameters: name, connectionString and providerName. These 
 correspond to the connection paratmers within the web.config. 
 . The first step is to create the user provided service with the name attendeeUPS
-+
+
 ----
 > cf create-user-provided-service attendeeUPS -p "name, connectionString, providerName"
 ----
