@@ -170,12 +170,6 @@ image::mvcattendeesrunning.png[]
 +
 Note the application name for next steps
 
-. Scale the app to 2 instances
-+
-----
-> cf scale wsattendees -i 2
-----
-
 . Get information about running instances, memory, CPU, and other statistics using CLI instances command
 +
 ----
