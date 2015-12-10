@@ -333,7 +333,7 @@ We want to create a service.
 . Run the following command
 +
 ----
-> cf create-service p-mysql 100mb attendeeDb
+> cf create-service p-mysql 100mb-dev attendeeDb
 ----
 . Now bind the service to our application. 
 +
